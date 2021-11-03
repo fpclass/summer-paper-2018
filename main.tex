@@ -1,0 +1,41 @@
+%-----------------------------------------------------------
+% LaTeX template for University of Warwick exams
+%-----------------------------------------------------------
+
+\usepackage{fancyeq}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\usepackage{newpxtext,newpxmath}
+\linespread{1.05}         % Palatino needs more leading (space between lines)
+\usepackage[T1]{fontenc}
+
+\usepackage{multicol}
+
+%\usepackage[nomap]{FiraMono}
+
+% configure the heading 
+\ModuleCode{CS2560}
+\ModuleName{Functional Programming}
+\ExamPeriod{Summer 2018}
+\ExamsName{Second Year Examinations}
+\TimeAllowed{2 hours}
+\QuestionInstructions{Answer \textbf{FOUR} questions.}
+\OtherInstructions{Read carefully the instructions on the answer book and make sure that the particulars required are entered on \textbf{each} answer book. \\
+
+No calculators are allowed. A copy of the Haskell Prelude is given in the Appendix.}
+
+\begin{document}
+	\MakeHeading
+	
+	\begin{questions}
+		\input{q1} % done
+		\input{q2} % done
+		\input{q3} % done
+		\input{q4} % done
+		\input{q5} % done
+		\input{q6} % done
+	\end{questions}
+
+	\input{prelude}
+\end{document}

@@ -1,0 +1,136 @@
+%%% Question 1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about functional programming as a programming paradigm.
+\begin{parts}
+\part For each of the following Haskell expressions, reduce it to its normal form.
+\begin{subparts}
+\subpart[1] \texttt{tail "Twitter"} \droppoints 
+\begin{solution}
+\emph{Comprehension.} \texttt{"witter"}
+\end{solution}
+\subpart[1] \texttt{take 4 ['f'..]} \droppoints
+\begin{solution}
+\emph{Comprehension.} \texttt{"fghi"}
+\end{solution}
+\subpart[1] \texttt{(\textbackslash x -> if x==0 then "duck" else "goose") (108 `mod` 42)}  \droppoints
+\begin{solution}
+\emph{Comprehension.} \texttt{"goose"}
+\end{solution}
+\subpart[1] \texttt{filter (not~.~isDigit) "CS256"} \droppoints
+\begin{solution}
+\emph{Comprehension.} \texttt{"CS"}
+\end{solution}
+\subpart[1] \texttt{fmap (fmap (fmap odd)) [[Just 15], [Nothing, Just 16], []]} \droppoints
+\begin{solution}
+\emph{Comprehension.}\\ \texttt{[[Just True], [Nothing, Just False], []]}
+\end{solution}
+\end{subparts}
+\ifprintanswers \pagebreak \else \fi
+\part For each of the following expressions, choose a permissible type from the options that are listed. There is exactly one correct option for each expression.
+\begin{subparts}
+    \subpart[1] \texttt{True \&\& False} \droppoints
+    \begin{enumerate}
+    	\item \texttt{Bool -> Bool -> Bool}
+    	\item \texttt{Eq a => a -> a -> a}
+    	\item \texttt{Eq a => a}
+    	\item \texttt{a -> a -> a}
+    	\item \texttt{Bool}
+    \end{enumerate}
+	\begin{solution}
+		\emph{Comprehension.} 5
+	\end{solution}
+    \subpart[1] \texttt{[("Duck", 60), ("Chicken", 2*60)]} \droppoints
+    \begin{enumerate}
+    	\item \texttt{[(String, Int)]}
+    	\item \texttt{[(String, Int), (String, Int)]}
+    	\item \texttt{[(String, Int), (String, Int -> Int -> Int)]}
+    	\item \texttt{([String], [Int])}
+    	\item \texttt{[(String, Int -> Int -> Int)]}
+    \end{enumerate}
+    \begin{solution}
+   		\emph{Comprehension.} 1
+    \end{solution}
+    \ifprintanswers \else \pagebreak \fi
+    \subpart[1] \texttt{\textbackslash f -> \textbackslash x -> \textbackslash y -> f y x} \droppoints
+    \begin{enumerate}
+    	\item \texttt{a -> b -> c}
+    	\item \texttt{(a -> b -> c) -> a -> b -> c}
+    	\item \texttt{(b -> a -> c) -> a -> b -> c}
+    	\item \texttt{b -> a -> c}
+    	\item \texttt{(b -> a -> c) -> b -> a -> c}
+    \end{enumerate}
+    \begin{solution}
+    	\emph{Comprehension.} 3
+    \end{solution}
+	\subpart[1] \texttt{\textbackslash f -> map f [Left 4, Right "koan", Left (4*8)]} \droppoints
+	\begin{enumerate}
+		\item \texttt{(Num a, Foldable f) => (Either a String -> b) -> f b}
+		\item \texttt{Num a => (Either a String -> b) -> [b]}
+		\item \texttt{(String -> b) -> [b]}
+		\item \texttt{Num a => (a -> b) -> [b]}
+		\item \texttt{Foldable f => (String -> b) -> f b}
+	\end{enumerate}
+	\begin{solution}
+		\emph{Comprehension.} 2
+	\end{solution}
+	\ifprintanswers \pagebreak \else \fi
+    \subpart[1] \texttt{\textbackslash (a,b) -> \textbackslash (Just c) -> show (last a + snd b) ++ tail c} \droppoints
+    \begin{enumerate}
+    	\item \texttt{(Num a, Show a) =>\\\phantom{~~~~}[a] -> b -> a -> Maybe String -> String}
+    	\item \texttt{Num a =>\\\phantom{~~~~}([a], b, a) -> Maybe String -> String}
+    	\item \texttt{(Num a, Show a, Applicative f) =>\\\phantom{~~~~}([a], (b, a)) -> f String -> String}
+    	\item \texttt{(Num a, Show a) =>\\\phantom{~~~~}([a], (b, a)) -> Maybe String -> String}
+    	\item \texttt{(Num a, Show a, Monad m) =>\\\phantom{~~~~}([a], (b, a)) -> m String -> String}
+    \end{enumerate}
+    \begin{solution}
+    	\emph{Comprehension.} 4
+    \end{solution}
+\end{subparts}
+\part[3] Consider the following definition:
+\begin{verbatim}
+myLength :: [a] -> Int
+myLength []     = 0
+myLength (x:xs) = 1 + myLength xs
+\end{verbatim}
+Define a function \texttt{myLength'} which is equivalent to \texttt{myLength}, but is defined using \texttt{foldl} instead of explicit recursion. \droppoints 
+\begin{solution}
+\emph{Application.} One possible answer is:
+\begin{verbatim}
+myLength' = foldl (\r x -> 1 + r) 0
+\end{verbatim}
+Since \texttt{(+)} is commutative, \texttt{r + 1} is also valid and so are alpha-equivalent answers or answers which are not pointfree.
+\end{solution}
+\part  \label{part:sum}
+\begin{subparts}
+\subpart[4] \label{part:strict} Trace how \texttt{myLength' [4,8,15]} would be evaluated in a language with \emph{call-by-value} semantics. \droppoints
+\begin{solution}
+\emph{Comprehension.}
+\begin{verbatim}
+   myLength' [4,8,15]
+=> foldl (\r x -> 1 + r) 0 [4,8,15]
+=> foldl (\r x -> 1 + r) (1 + 0) [8,15]
+=> foldl (\r x -> 1 + r) 1 [8,15]
+=> foldl (\r x -> 1 + r) (1 + 1) [15]
+=> foldl (\r x -> 1 + r) 2 [15]
+=> foldl (\r x -> 1 + r) (1 + 2) []
+=> foldl (\r x -> 1 + r) 3 []
+=> 3
+\end{verbatim}
+\end{solution}
+\subpart[4] \label{part:lazy} Trace how \texttt{myLength' [4,8,15]} would be evaluated in a language with \emph{call-by-name} semantics. You should assume that the value of \texttt{myLength' [4,8,15]} is required by some other part of the program. \droppoints
+\begin{solution} \emph{Comprehension.}
+	\begin{verbatim}
+	   myLength' [4,8,15]
+	=> foldl (\r x -> 1 + r) 0 [4,8,15]
+	=> foldl (\r x -> 1 + r) (1 + 0) [8,15]
+	=> foldl (\r x -> 1 + r) (1 + 1 + 0) [15]
+	=> foldl (\r x -> 1 + r) (1 + 1 + 1 + 0) []
+	=> 1 + 1 + 1 + 0
+	=> 3
+	\end{verbatim}
+\end{solution}
+\subpart[4] Briefly explain what is meant by \emph{sharing} and why it is useful in a language that uses call-by-name semantics. \droppoints
+\begin{solution} \emph{Bookwork.}
+In a language which uses call-by-name evaluation, such as Haskell, function arguments are only evaluated when it becomes clear that their value is needed. Expressions are represented by \emph{closures} (stored on the heap) and pointers to them are then passed to functions as arguments. If an argument is used more than once within a function, then it will be evaluated multiple times. Sharing is an optimisation which allows closures to be \emph{updated} with their result once they have been evaluated, meaning they only have to be evaluated once.
+\end{solution}
+\end{subparts}
+\end{parts}

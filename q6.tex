@@ -1,0 +1,74 @@
+%%% Question 6 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about type-level programming.
+\begin{parts}
+\part[2] \label{q6:colour} Define a data type to represent the colours red and black so that:\\
+\texttt{c1,~c2~::~Colour}\\
+\texttt{c1 = R}\\
+\texttt{c2 = B} \droppoints 
+\begin{solution}
+\emph{Comprehension.} \texttt{data Colour = R | B}
+\end{solution}
+\part[4] Using your data type for colours as an example, explain what is meant by \emph{type promotion}. Illustrate your answer by showing all relevant terms with their types and all relevant types with their kinds. \droppoints 
+\begin{solution}
+\emph{Bookwork+Comprehension.} The definition of \texttt{Colour} above introduces a type \texttt{Colour} with two data constructors \texttt{R~::~Colour} and \texttt{B~::~Colour} which construct values of type \texttt{Colour} on the term-level. Type promotion refers to the process of lifting a type to the kind-level. For example, the \texttt{Colour} type above can be turned into a kind \texttt{Colour} with two types \texttt{'R~::~Colour} and \texttt{'B~::~Colour}.
+\end{solution}
+\part[2] Briefly explain what is meant by \emph{type erasure}. \droppoints 
+\begin{solution}
+\emph{Bookwork.} Types are only used by the compiler to check that a program is valid and are then erased. In other words, the types of a program are not available at runtime.
+\end{solution}
+\part Singleton types and reification can be used as workarounds for type erasure: singleton types let us pass types of some arbitrary kind to functions as arguments by having exactly one value which corresponds to each type of that kind. Reification lets us ``convert'' types to values.
+\begin{subparts}
+\subpart[3] Define a singleton type for the \texttt{Colour} kind, \emph{i.e.} a type \texttt{SColour} of kind \texttt{Colour -> *}. \droppoints
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+data SColour (c :: Colour) where 
+    SR :: SColour 'R 
+    SB :: SColour 'B
+\end{verbatim}
+\end{solution}
+\subpart[4] Define a suitable type class and type class instances to reify types of kind \texttt{Colour}. In other words, you should end up with a function \texttt{reifyColour} which, given a value of type \texttt{SColour R} as argument, evaluates to \texttt{R} and, if given a value of type \texttt{SColour B}, evaluates to \texttt{B}. \droppoints \ifprintanswers \pagebreak \else \fi
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+class ReifyColour (c :: Colour) where
+    reifyColour :: SColour c -> Colour
+
+instance ReifyColour 'R where
+    reifyColour _ = R
+
+instance ReifyColour 'B where
+    reifyColour _ = B
+\end{verbatim}
+\end{solution}
+\end{subparts}
+\part Recall the four invariants of red-black trees:
+\begin{itemize}
+	\item The root is black 
+	\item Leaves are black 
+	\item Red nodes have black children
+	\item From each node, every path to a leaf has the same number of black nodes
+\end{itemize}
+With the help of the \texttt{Colour} type you defined for part 6\ref{q6:colour} and the usual \texttt{Nat} type, we can define a data type for red-black trees which allows red-black trees to be indexed by colour and number of black nodes on the type-level:
+\begin{verbatim}
+data Tree :: Colour -> Nat -> * -> * where
+  E  :: Tree B Zero a
+  TR :: Tree B n a -> a -> Tree B n a -> Tree R n a
+  TB :: Tree c n a -> a -> Tree d n a -> 
+        Tree B (Succ n) a 
+\end{verbatim}
+Red nodes are represented by the \texttt{TR} constructor, black nodes are represented by the \texttt{TB} constructor, and leaves are represented by the \texttt{E} constructor.
+\begin{subparts}
+\subpart[6] Explain how three of the four invariants of red-black trees are enforced by this definition. \droppoints
+\begin{solution} 
+\emph{Comprehension.} The property not enforced is ``the root is black''. The \texttt{E} constructor for leaves returns a tree which is marked as black, therefore leaves are always black. The \texttt{TR} constructor only accepts trees as arguments (its children) which are marked as black. Therefore, a red node can only have black children. For the last invariant, consider \texttt{TB E "foo" E} which is of type \texttt{Tree B (Succ Zero) String}. The \texttt{Succ Zero} indicates that there is one black node in this tree. Whenever the \texttt{TB} constructor is used, it adds one the number of black nodes in its subtrees, where the number of black nodes must be the same: this is enforced by the use of the same type variable \texttt{n}. The \texttt{TR} constructor enforces this constraint in the same way.
+\end{solution}
+\subpart[4] Define a function \texttt{rev~::~Tree c n a -> Tree c n a} which reverses the elements of a tree so that the left-most element becomes the right-most and vice-versa. \droppoints 
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+rev :: Tree c n a -> Tree c n a
+rev E          = E
+rev (TR a x b) = TR (rev b) x (rev a)
+rev (TB a x b) = TB (rev b) x (rev a)
+\end{verbatim}
+\end{solution}
+\end{subparts}
+\end{parts}

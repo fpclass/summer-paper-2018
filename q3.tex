@@ -1,0 +1,76 @@
+
+%%% Question 3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about user-defined types and type classes.
+\begin{parts}
+\part A queue is a FIFO (first-in-first-out) data structure. In Haskell, we could represent a queue as the following data type:
+\begin{verbatim}
+data Queue a = MkQueue [a]
+\end{verbatim} 
+\begin{subparts}
+\subpart[2] What is the type of the \texttt{MkQueue} constructor? \droppoints 
+\begin{solution} \emph{Comprehension.}
+\begin{verbatim}
+MkQueue :: [a] -> Queue a
+\end{verbatim}
+\end{solution}
+\subpart[1] Define a value \texttt{empty~::~Queue a} which represents the empty queue. \droppoints 
+\begin{solution} \emph{Comprehension.}
+\begin{verbatim}
+empty = MkQueue []
+\end{verbatim}
+\end{solution}
+%\subpart[1] Define a function \texttt{toList~::~Queue a -> [a]} which returns the contents of a queue as a list. \droppoints 
+\subpart[2] Define a function \texttt{enqueue~::~a -> Queue a -> Queue a} which adds an element to a queue. For example, \texttt{enqueue 3 (MkQueue [2,1])} should evaluate to \texttt{MkQueue [3,2,1]}. \droppoints 
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+enqueue x (MkQueue xs) = MkQueue (x:xs)
+\end{verbatim}
+\end{solution}
+\subpart[4] Define a function \texttt{dequeue~::~Queue a -> (Maybe a, Queue a)} which returns the first item in the queue if there is one as well as an updated queue. For example, \texttt{dequeue empty} should evaluate to \texttt{(Nothing, empty)} and \texttt{dequeue (MkQueue [2,1])} should evaluate to \texttt{(Just 1,\\ MkQueue [2])}. \droppoints
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+dequeue (MkQueue []) = (Nothing, empty)
+dequeue (MkQueue xs) = (Just (last xs), MkQueue (init xs))
+\end{verbatim}
+\end{solution}
+\subpart[3] What is the time complexity of your \texttt{dequeue} function and why? \droppoints 
+\begin{solution} 
+\emph{Comprehension.} The time complexity of \texttt{dequeue} is $\mathcal{O}(n)$ where $n$ is the number of items in the queue. This is because both \texttt{last} and \texttt{init} are linear in the length of the list.
+\end{solution}
+\end{subparts}
+\part We can improve on the above implementation of queues by using two lists instead of one. We will only add items to the second list and only remove items from the first.
+\begin{verbatim}
+data PQueue a = MkPQueue [a] [a]
+\end{verbatim}
+\begin{subparts}
+\subpart[2] Define a function \texttt{enqueueP~::~a -> PQueue a -> PQueue a} which adds an element to the second list used to represent the queue. For example, \texttt{enqueueP 3 (MkPQueue [] [2,1])} should evaluate to \texttt{MkPQueue [] [3,2,1]}. \droppoints
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+enqueueP y (MkPQueue xs ys) = MkPQueue xs (y:ys)
+\end{verbatim}
+\end{solution}
+\subpart[5] Define a function \texttt{dequeueP~::~PQueue a -> (Maybe a, PQueue a)} \linebreak which returns the first item in the queue if there is one as well as an updated queue. For example, \texttt{dequeueP (MkPQueue [1,2,3] [4])} should evaluate to \texttt{(Just 1, MkPQueue [2,3] [4])} and \texttt{dequeueP (MkPQueue [] [3,2,1])} should evaluate to \texttt{(Just 1, MkPQueue [2,3] [])}. \droppoints
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+dequeueP (MkPQueue [] []) = 
+    (Nothing, MkPQueue [] [])
+dequeueP (MkPQueue [] ys) = 
+    dequeueP (MkPQueue (reverse ys) [])
+dequeueP (MkPQueue (x:xs) ys) = 
+    (Just x, MkPQueue xs ys)
+\end{verbatim}
+\end{solution}
+\subpart[3] Briefly compare the time complexities of the \texttt{dequeue} and \texttt{dequeueP} functions. \droppoints 
+\begin{solution}
+\emph{Comprehension.} The \texttt{dequeue} function always needs to traverse the entirety of the list used to represent the queue while \texttt{dequeueP} runs in constant time in the best case because the first item in the queue can just be removed from the head of the first list. Indeed, \texttt{dequeueP} has an amortised time complexity of $\mathcal{O}(1)$.
+\end{solution}
+\subpart[3] The \texttt{PQueue} type is a functor. Define an instance of the \texttt{Functor} type class for it. \droppoints 
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+instance Functor PQueue where
+    fmap f (MkPQueue xs ys) = 
+         MkPQueue (fmap f xs) (fmap f ys)
+\end{verbatim}
+\end{solution}
+\end{subparts}
+\end{parts}

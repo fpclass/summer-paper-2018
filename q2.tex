@@ -1,0 +1,62 @@
+%%% Question 2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about recursive and higher-order functions.
+\begin{parts}
+\part[4] Define a function 
+\begin{center}
+	\texttt{count~::~Eq a => a -> [a] -> Int}
+\end{center} 
+which counts how many times a given element occurs in a list. For example, \linebreak \texttt{count 'a' ['a','b','c','a']} should evaluate to \texttt{2}. \droppoints
+\begin{solution}
+\emph{Application.} A concise, pointfree solution using function composition is shown below:
+\begin{verbatim}
+count x = length . filter (== x)
+\end{verbatim}
+\end{solution}
+\part[5] Define a function 
+\begin{center}
+	\texttt{rmdups~::~Eq a => [a] -> [a]} 
+\end{center}
+which removes all duplicate elements from a given list. For example, \linebreak \texttt{rmdups ['a','b','c','a','b','b']} should evaluate to \texttt{['a','b','c']}. \droppoints
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+rmdups []     = []
+rmdups (x:xs) = x : filter (/= x) (rmdups xs)
+\end{verbatim}
+\end{solution}
+\part[5] Using \texttt{count} and \texttt{rmdups}, define a function
+\begin{center}
+	\texttt{scores~::~Eq a => [a] -> [(Int, a)]}
+\end{center}
+which counts how many times each distinct element occurs in the list. For example, \texttt{scores ['a','b','c','a','b','b']} should evaluate to the following list: \texttt{[(2, 'a'), (3, 'b'), (1, 'c')]}. \droppoints 
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+scores vs = [(count v vs, v) | v <- rmdups vs]
+\end{verbatim}
+\end{solution}
+\part[6] Define a function 
+\begin{center}
+	\texttt{sortPairs~::~Ord a => [(a,b)] -> [(a,b)]}
+\end{center} 
+which sorts lists of pairs by the first component of the pairs. For example, \texttt{sortPairs~[(2, 'a'), (3, 'b'), (1, 'c')]} should evaluate to the list \texttt{[(1, 'c'), (2, 'a'), (3, 'b')]}. \droppoints
+\begin{solution}
+\emph{Bookwork+Application.} This is almost bookwork as the solution is just a slight modification of the sorting function that was shown in the first lecture:
+\begin{verbatim}
+sortPairs [] = []
+sortPairs (x:xs) = sortPairs ys ++ [x] ++ sortPairs zs
+  where ys = [y | y <- xs, fst y <= fst x]
+        zs = [z | z <- xs, fst z >  fst x]
+\end{verbatim}
+Indeed, instead of defining the \texttt{sortPairs} function, the problem could just be solved by using the built-in \texttt{sort} function directly. However, the behaviour is not exactly the same, since \texttt{sort} will sort pairs where the first component is the same by their second component as well. Otherwise they are the same. Note that \texttt{sortPairs} cannot be implemented in terms of \texttt{sort} since there is no \texttt{Ord} constraint on \texttt{b}.
+\end{solution}
+\part[5] Suppose that we wish to determine which element of a list occurs most frequently. Using \texttt{scores} and \texttt{sortPairs}, define a function 
+\begin{center}
+	\texttt{mostFrequent~::~Ord a => [a] -> a}
+\end{center}
+which determines which element of the list given as argument occurs most frequently in the list. For example, \texttt{mostFrequent ['a','b','c','a','b','b']} should evaluate to \texttt{'b'}.  \droppoints 
+\begin{solution} \emph{Application.}
+A very elegant solution using function composition:
+\begin{verbatim}
+mostFrequent = snd . last . sortPairs . scores
+\end{verbatim}
+\end{solution}
+\end{parts}

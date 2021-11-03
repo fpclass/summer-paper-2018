@@ -1,0 +1,144 @@
+\allowdisplaybreaks
+%%% Question 4 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about equational reasoning.
+\begin{parts}
+\part[2] What does it mean for a function to be \emph{pure}? \droppoints 
+\begin{solution}
+\emph{Bookwork.} A function is pure if and only if its result only depends on its arguments and the function has no side-effects.
+\end{solution}
+\part \label{q4:distributivity} Prove the following theorem which states that \texttt{++} distributes over conditions: 
+\begin{center}
+\texttt{\ \ \ \ \ \ \phantom{~~~}if b then x :~(xs ++ ys) else xs ++ ys \\
+== (if b then x :~xs else xs) ++ ys}
+\end{center}
+The proof will be by case analysis on \texttt{b}. That is, we will examine the two cases where \texttt{b = True} and \texttt{b = False} respectively.
+\begin{subparts}
+\subpart[4] Prove the case where \texttt{b = False}:\\
+\texttt{\phantom{~~~}if False then x :~(xs ++ ys) else xs ++ ys}\\
+\texttt{== (if False then x :~xs else xs) ++ ys} \droppoints
+\begin{solution} \emph{Application.}
+	\begin{align*}
+	\expr{\mathbf{if}~\mathit{False}~\mathbf{then}~x:(\mathit{xs} \append \mathit{ys})~\mathbf{else}~\mathit{xs} \append \mathit{ys}}
+	\hint{Condition}
+	\expr{\mathit{xs} \append \mathit{ys}}
+	\hint{Condition}
+	\lastexpr{(\mathbf{if}~\mathit{False}~\mathbf{then}~x:\mathit{xs}~\mathbf{else}~\mathit{xs}) \append \mathit{ys}}
+	\end{align*}
+\end{solution} 
+\subpart[4] Prove the case where \texttt{b = True}:\\
+\texttt{\phantom{~~~}if True then x :~(xs ++ ys) else xs ++ ys}\\
+\texttt{== (if True then x :~xs else xs) ++ ys} \droppoints 
+\begin{solution} \emph{Application.}
+\begin{align*}
+\expr{\mathbf{if}~\mathit{True}~\mathbf{then}~x:(\mathit{xs} \append \mathit{ys})~\mathbf{else}~\mathit{xs} \append \mathit{ys}}
+\hint{Condition}
+\expr{x:(\mathit{xs} \append \mathit{ys})}
+\hint{Unapplying $\append$}
+\expr{(x:\mathit{xs}) \append \mathit{ys}}
+\hint{Condition}
+\lastexpr{(\mathbf{if}~\mathit{True}~\mathbf{then}~x:\mathit{xs}~\mathbf{else}~\mathit{xs}) \append \mathit{ys}}
+\end{align*}
+\end{solution}
+\end{subparts}
+\part[7] With the help of the theorem you proved for part (\ref{q4:distributivity}), prove the following theorem which states that the result of filtering two concatenated lists using a predicate \texttt{p} is the same as filtering the two lists separately and then concatenating the results:
+\begin{center}
+	\texttt{filter p (xs ++ ys) == filter p xs ++ filter p ys}
+\end{center}
+For simplicity, you should assume that \texttt{filter} is defined in the following way:\\[0.2cm]
+\texttt{filter~::~(a -> Bool) -> [a] -> [a]}\\
+\texttt{filter p []~~~~~= []}\\
+\texttt{filter p (x:xs) = if p x then x :~filter p xs}\\
+\texttt{\phantom{~~~~~~~~~~~~~~~~~~~~~~~~~}else~~~~~filter p xs} \droppoints
+\begin{solution}
+\emph{Application.} The proof is by induction on \texttt{xs}. For the base case we have the empty list:
+\begin{align*}
+\expr{\mathit{filter}~p~(\hslist{} \append \mathit{ys})}
+\hint{Applying $\append$}
+\expr{\mathit{filter}~p~\mathit{ys}}
+\hint{Unapplying $\append$}
+\expr{\hslist{} \append \mathit{filter}~p~\mathit{ys}}
+\hint{Unapplying $\mathit{filter}$}
+\lastexpr{\mathit{filter}~p~\hslist{} \append \mathit{filter}~p~\mathit{ys}}
+\end{align*}
+For the inductive step we assume that the theorem holds for \texttt{xs} and need to prove that it also holds for \texttt{(x:xs)}:
+\begin{align*}
+\expr{\mathit{filter}~p~((x:\mathit{xs}) \append \mathit{ys})}
+\hint{Applying $\append$}
+\expr{\mathit{filter}~p~(x : (\mathit{xs} \append \mathit{ys}))}
+\hint{Applying $\mathit{filter}$}
+\expr{\mathbf{if}~p~x~\mathbf{then}~x:\mathit{filter}~p~(\mathit{xs} \append \mathit{ys})~\mathbf{else}~\mathit{filter}~p~(\mathit{xs} \append \mathit{ys})}
+\hint{Induction hypothesis (twice)}
+\expr{\mathbf{if}~p~x~\mathbf{then}~x:(\mathit{filter}~p~\mathit{xs} \append \mathit{filter}~p~\mathit{ys})~\mathbf{else}~(\mathit{filter}~p~\mathit{xs} \append \mathit{filter}~p~\mathit{ys})}
+\hint{Distributivity theorem}
+\expr{(\mathbf{if}~p~x~\mathbf{then}~x:\mathit{filter}~p~\mathit{xs}~\mathbf{else}~\mathit{filter}~p~\mathit{xs}) \append \mathit{filter}~p~\mathit{ys}}
+\hint{Unapplying $\mathit{filter}$}
+\expr{\mathit{filter}~p~(x:\mathit{xs}) \append \mathit{filter}~p~\mathit{ys}}
+\end{align*}
+\end{solution}
+
+
+\part[8] Binary trees can be defined in Haskell as:
+\begin{center}
+	\texttt{data BinTree a = Leaf a | Node (BinTree a) (BinTree a)}
+\end{center}
+This type is a functor:
+\begin{verbatim}
+instance Functor BinTree where
+    fmap f (Leaf x)   = Leaf (f x)
+    fmap f (Node l r) = Node (fmap f l) (fmap f r)
+\end{verbatim}
+Prove that the functor laws hold for this definition of \texttt{fmap.} \droppoints 
+\begin{solution}
+\emph{Application.} The first law is \texttt{fmap id = id}. We can prove this by induction. The base case is for \texttt{Leaf x}:
+\begin{align*}
+\expr{\mathit{fmap}~\mathit{id}~(\mathit{Leaf}~x)}
+\hint{applying $\mathit{fmap}$}
+\expr{\mathit{Leaf}~(\mathit{id}~x)}
+\hint{applying $\mathit{id}$}
+\expr{\mathit{Leaf}~x}
+\hint{unapplying $\mathit{id}$}
+\lastexpr{\mathit{id}~(\mathit{Leaf}~x)}
+\end{align*}
+The inductive step is for \texttt{Node l r} where the induction hypothesis holds for \texttt{l} and \texttt{r}:
+\begin{align*}
+\expr{\mathit{fmap}~\mathit{id}~(\mathit{Node}~l~r)}
+\hint{applying $\mathit{fmap}$}
+\expr{\mathit{Node}~(\mathit{fmap}~\mathit{id}~l)~(\mathit{fmap}~\mathit{id}~r)}
+\hint{applying both induction hypotheses}
+\expr{\mathit{Node}~(\mathit{id}~l)~(\mathit{id}~r)}
+\hint{applying $\mathit{id}$ twice}
+\expr{\mathit{Node}~l~r}
+\hint{unapplying $\mathit{id}$}
+\lastexpr{\mathit{id}~(\mathit{Node}~l~r)}
+\end{align*}
+The second law is \texttt{fmap (f~.~g) = fmap f~.~fmap g}. We can prove this by induction. The base case is for \texttt{Leaf x}:
+\begin{align*}
+\expr{\mathit{fmap}~(f \circ g)~(\mathit{Leaf}~x)}
+\hint{applying $\mathit{fmap}$}
+\expr{\mathit{Leaf}~((f \circ g)~x)}
+\hint{definition of $(\circ)$}
+\expr{\mathit{Leaf}~(f~(g~x))}
+\hint{unapplying $\mathit{fmap}$}
+\expr{\mathit{fmap}~f~(\mathit{Leaf}~(g~x))}
+\hint{unapplying $\mathit{fmap}$}
+\expr{\mathit{fmap}~f~(\mathit{fmap}~g~(\mathit{Leaf}~x))}
+\hint{definition of $(\circ)$}
+\lastexpr{(\mathit{fmap}~f \circ \mathit{fmap}~g)(\mathit{Leaf}~x)}
+\end{align*}
+The inductive step is for \texttt{Node l r} where the induction hypothesis holds for \texttt{l} and \texttt{r}:
+\begin{align*}
+\expr{\mathit{fmap}~(f \circ g)~(\mathit{Node}~l~r)}
+\hint{applying $\mathit{fmap}$}
+\expr{\mathit{Node}~(\mathit{fmap}~(f \circ g)~l)~(\mathit{fmap}~(f \circ g)~r)}
+\hint{induction hypotheses}
+\expr{\mathit{Node}~(\mathit{fmap}~f~(\mathit{fmap}~g~l))~(\mathit{fmap}~f~(\mathit{fmap}~g~r))}
+\hint{unapplying $\mathit{fmap}$}
+\expr{\mathit{fmap}~f~(\mathit{Node}~(\mathit{fmap}~g~l)~(\mathit{fmap}~g~r))}
+\hint{unapplying $\mathit{fmap}$}
+\expr{\mathit{fmap}~f~(\mathit{fmap}~g~(\mathit{Node}~l~r))}
+\hint{unapplying $(\circ)$}
+\lastexpr{(\mathit{fmap}~f \circ \mathit{fmap}~g)~(\mathit{Node}~l~r)}
+\end{align*}
+~
+\end{solution}
+\end{parts}

@@ -1,0 +1,124 @@
+
+%%% Question 5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\question This question is about monads.
+\begin{parts} 
+\part[4] Define a suitable instance of the \texttt{Monad} type class for the \texttt{Either} type:
+
+\texttt{data Either a b = Left a | Right b} \droppoints 
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+instance Monad (Either e) where 
+    return x = Right x
+    
+    Left y  >>= f = Left y 
+    Right x >>= f = f x
+\end{verbatim}
+\end{solution}
+\part[5] Monads are a more expressive abstraction than Applicative Functors. That is, some functions that can be implemented in terms of \texttt{(>{}>=)} cannot be implemented with just \texttt{fmap} and \texttt{(<*>)}. Using a suitable example, explain the limitations of Applicative Functors. \droppoints
+\begin{solution}
+\emph{Bookwork+Comprehension.} Applicative effects cannot depend on the results of previous computations. Consider the example of looking up the grandmother of a person from a dictionary which maps people to their mothers. This dictionary can be represented as a value of type \texttt{[(String, String)]} and we can then use the \texttt{lookup~::~Eq a => a -> [(a,b)] -> Maybe b} function from the standard library to retrieve the name of the mother of a given person:
+\begin{verbatim}
+grandmother :: String -> [(String, String)] -> Maybe String
+grandmother x dict = do 
+    mother <- lookup x dict
+    lookup mother dict
+\end{verbatim}
+If there is no mapping for a person's name to their mother, then \texttt{Nothing} is returned. Therefore, to look up a person's grandmother, we first need to look up their mother's name and then the name of their mother's mother. 
+\end{solution}
+\part[10] Prove that your instance of the \texttt{Monad} type class for the \texttt{Either} type obeys the monad laws. \droppoints
+\begin{solution}
+\emph{Application.} We can prove left identity through simple equational reasoning to rewrite one side of the equation to the other:
+\begin{displaymath}
+\begin{array}{cl}
+\expr{\mathit{return}~x \bind f}
+\hint{Definition of $\mathit{return}$}
+\expr{\mathit{Right}~x \bind f}
+\hint{Definition of $\bind$}
+\lastexpr{f~x}
+\end{array}
+\end{displaymath}
+The proof for right identity is by case analysis on $m$. In the case that $m = \mathit{Left~a}$ for all $a$:
+\begin{displaymath}
+\begin{array}{cl}
+\expr{\mathit{Left~a} \bind \mathit{return}}
+\hint{Definition of $\bind$}
+\lastexpr{\mathit{Left~a}}
+\end{array}
+\end{displaymath}
+In the case that $m = \mathit{Right}~b$ for all $b$:
+\begin{displaymath}
+\begin{array}{cl}
+\expr{\mathit{Right}~b \bind \mathit{return}}
+\hint{Definition of $\bind$}
+\expr{\mathit{return}~b}
+\hint{Definition of $\mathit{return}$}
+\lastexpr{\mathit{Right}~b}
+\end{array}
+\end{displaymath}
+The proof for associativity is also by case analysis on $m$. In the case we have that $m = \mathit{Left~a}$ for all $a$:
+\begin{displaymath}
+\begin{array}{cl}
+\expr{(\mathit{Left~a} \bind f) \bind g}
+\hint{Definition of $\bind$}
+\expr{\mathit{Left~a} \bind g}
+\hint{Definition of $\bind$}
+\expr{\mathit{Left~a}}
+\hint{Unapplying $\bind$}
+\lastexpr{\mathit{Left~a} \bind (\lambda x \to f~x \bind g)}
+\end{array}
+\end{displaymath}
+In the case that $m = \mathit{Right}~b$ for all $b$: \allowdisplaybreaks
+\begin{displaymath}
+\begin{array}{cl}
+\expr{(\mathit{Right}~b \bind f) \bind g}
+\hint{Definition of $\bind$}
+\expr{f~b \bind g}
+\hint{$\eta$-expansion}
+\expr{(\lambda x \to f~x \bind g)~b}
+\hint{Unapplying $\bind$}
+\lastexpr{\mathit{Right}~b \bind (\lambda x \to f~x \bind g)}
+\end{array}
+\end{displaymath}
+\end{solution}
+\part[3] Define a function 
+\begin{center}
+	\texttt{foldrM~::~Monad m => (a -> b -> m b) -> b -> [a] -> m b}
+\end{center}
+which generalises \texttt{foldr} to functions with monadic effects. \droppoints
+\begin{solution} \emph{Application.}
+\begin{verbatim}
+foldrM f z []     = return z 
+foldrM f z (x:xs) = do 
+     z' <- foldrM f z xs
+     f x z'
+\end{verbatim}
+\end{solution}
+\part[3] The following, monadic program is written using the do-notation which is just syntactic sugar for \texttt{>{}>=} and anonymous functions. Show what the program would look like without the do-notation: \droppoints 
+\begin{verbatim}
+supers :: [(String, String)]
+supers = [ ("Monad", "Applicative")
+         , ("Applicative", "Functor") ]
+
+main :: IO ()
+main = do x <- getLine
+          case (do y <- lookup x supers
+                   lookup y supers) of
+             Nothing -> return ()
+             Just z  -> do putStrLn z
+                           main
+\end{verbatim}
+\begin{solution} \emph{Comprehension.}
+\begin{verbatim}
+supers :: [(String, String)]
+supers = [ ("Monad", "Applicative")
+         , ("Applicative", "Functor") ]
+	
+main :: IO ()
+main = getLine >>= \x ->
+	   case (lookup x supers >>= \y ->
+	         lookup y supers) of
+	       Nothing -> return ()
+	       Just z  -> putStrLn z >> main
+\end{verbatim}
+\end{solution}
+\end{parts}
